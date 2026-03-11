@@ -11,7 +11,7 @@ buildNpmPackage (finalAttrs: {
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@moonpay/cli/-/cli-${finalAttrs.version}.tgz";
-    hash = "sha256-xhClkwRKXfdd9NzRsHsTmF4gXs9oxdbAT0XdkDqKB30=";
+    hash = "sha256-uneUlvc81oTfDACyJN71ARG22nuPOR/rN4Rfe+60KPc=";
   };
 
   sourceRoot = "package";
@@ -20,7 +20,7 @@ buildNpmPackage (finalAttrs: {
     cp ${./moonpay-cli-package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-E1wYxH00/PWx9fvmgd95hdyG5EnVTkv4qDP9MG0dqcQ=";
+  npmDepsHash = "sha256-O/TVoZKc6jM5FzNET/FgFOEY9EqimfpjEfQNeaKktq0=";
 
   npmFlags = [ "--include=optional" ];
   dontNpmBuild = true;
