@@ -51,7 +51,7 @@ run_windows = "mise run bootstrap:windows"
 [tasks."bootstrap:macos"]
 description = "macOS bootstrap: Homebrew bundle + symlink dotfiles"
 run = [
-  "if command -v brew >/dev/null 2>&1; then brew bundle install --no-upgrade --file '{{config_root}}/Brewfile'; fi",
+  "if command -v brew >/dev/null 2>&1; then HOMEBREW_MISE_ENV=\"${MISE_ENV:-}\" brew bundle install --no-upgrade --file '{{config_root}}/Brewfile'; fi",
   "mise run dotfiles:deploy",
 ]
 
@@ -241,7 +241,7 @@ check() {
     case "$(readlink "$HOME/.zshenv")" in "$root"/*) ;; *) echo "dotfiles:check: ~/.zshenv does not link into $root" >&2; exit 1 ;; esac
   fi
 }
-for profile in "" hm lab; do
+for profile in "" hm lab work; do
   homes="fresh legacy refused"
   # Without the hm profile the deploy must refuse a home that home-manager links into.
   if [ -z "$profile" ]; then homes="$homes home-manager"; fi
