@@ -1,0 +1,4 @@
+# Loaded when MISE_ENV includes lab: the personal machines that operate the homelab. The work
+# laptop leaves it out.
+[dotfiles]
+"~/.agents/AGENTS.lab.md" = { source = ".agents/AGENTS.lab.md" }
