@@ -1,0 +1,4 @@
+# Loaded when MISE_ENV includes work: the work laptop. It leaves out the homelab's tools and hosts.
+# Brewfile skips its personal entries under the same variable.
+[dotfiles]
+"~/.config/mise/config.work.toml" = { source = "mise-global-config.work.toml" }

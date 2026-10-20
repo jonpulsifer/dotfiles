@@ -2,3 +2,4 @@
 # laptop leaves it out.
 [dotfiles]
 "~/.agents/AGENTS.lab.md" = { source = ".agents/AGENTS.lab.md" }
+"~/.ssh/config.lab" = { source = ".ssh/config.lab" }
