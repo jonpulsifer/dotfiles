@@ -1,13 +1,11 @@
-import { readFileSync, realpathSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 
-// import.meta.url keeps the ~/.dotfiles symlink, so resolve it before walking up.
-const REPO = resolve(
-  dirname(realpathSync(fileURLToPath(import.meta.url))),
-  '../../../..',
-);
+// The lab's servers come from the infra checkout. A machine without it, such as the work laptop,
+// registers none.
+const REPO = join(homedir(), 'src/github.com/jonpulsifer/infra');
 const KTHX_TOKEN = 'op://homelab/workstation kthx agent token/credential';
 
 // A load error aborts `pi -p`, so a missing file skips its servers.
@@ -20,6 +18,7 @@ function readJson(path: string): any {
 }
 
 export default function (pi: ExtensionAPI) {
+  if (!existsSync(REPO)) return;
   const fleet = readJson('terraform/network/tailscale/fleet.tf.json');
   const tailnet = fleet?.locals?.fleet?.tailnet;
   if (typeof tailnet === 'string' && tailnet) {

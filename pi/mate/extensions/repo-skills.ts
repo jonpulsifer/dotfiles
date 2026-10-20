@@ -1,11 +1,11 @@
-import { existsSync, realpathSync } from 'node:fs';
+import { existsSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 
-const REPO_SKILLS = resolve(
-  dirname(realpathSync(fileURLToPath(import.meta.url))),
-  '../../../../.agents/skills',
+const REPO_SKILLS = join(
+  homedir(),
+  'src/github.com/jonpulsifer/infra/.agents/skills',
 );
 
 // A repo with its own .agents/skills loads them as project skills, which win
