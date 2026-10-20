@@ -1,0 +1,22 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    'helpers:pinGitHubActionDigests',
+    ':semanticCommits',
+    ':automergePr',
+  ],
+  customManagers: [
+    {
+      customType: 'regex',
+      description: 'zsh plugin pins in the global mise config',
+      managerFilePatterns: ['/^mise-global-config\\.toml$/'],
+      matchStrings: [
+        // # renovate: datasource=github-tags depName=sindresorhus/pure
+        // version = "1.27.1"
+        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\nversion = "(?<currentValue>[^"]+)"',
+      ],
+      extractVersionTemplate: '^v?(?<version>.+)$',
+    },
+  ],
+}

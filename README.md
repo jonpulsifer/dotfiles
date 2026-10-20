@@ -10,18 +10,18 @@ On macOS or Linux, from a clone of this repo:
 
 ```bash
 curl https://mise.run | sh
-mise trust -y dotfiles/mise.toml
-mise run --cd dotfiles bootstrap
+mise trust -y mise.toml
+mise run bootstrap
 ```
 
 Run it from the main checkout, not a worktree: the links point into the
 directory it runs from. On a work machine, set `MISE_ENV=work` first. CI and
-the NixOS hosts run mise 2026.10.0, the release `nix/lib/mise.nix` pins.
+the NixOS hosts run mise 2026.10.0, the release `nix/lib/mise.nix` in the infra repo pins.
 
 On macOS, install [Homebrew](https://brew.sh/) first. `bootstrap` installs the
 `Brewfile` and then links the files into `$HOME`. On Linux, it only links the
 files. Each NixOS activation runs `dotfiles:deploy` from a store copy of this
-directory through `nix/system/mise-dotfiles.nix`, with `MISE_ENV=hm` where
+repo, which the infra repo's `nix/system/mise-dotfiles.nix` takes as a flake input, with `MISE_ENV=hm` where
 home-manager runs, and `nix/home/jawn.nix` installs the shell tools. On a
 NixOS host with home-manager, a manual run needs `MISE_ENV=hm` too, because
 mise replaces any existing symlink at a target.
@@ -37,15 +37,15 @@ Code writes to. Copy it there by hand.
 On Windows, run this in any PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/jonpulsifer/infra/main/dotfiles/windows/bootstrap.ps1 | iex
+irm https://raw.githubusercontent.com/jonpulsifer/dotfiles/main/windows/bootstrap.ps1 | iex
 ```
 
-The script applies `windows/configuration.winget`, makes a sparse clone of this
-repo in `%USERPROFILE%\src\github.com\jonpulsifer\infra`, and runs
+The script applies `windows/configuration.winget`, clones this repo to
+`%USERPROFILE%\src\github.com\jonpulsifer\dotfiles`, and runs
 `bootstrap`. To also install WSL and a NixOS distro, pass `-WithWsl`:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/jonpulsifer/infra/main/dotfiles/windows/bootstrap.ps1))) -WithWsl
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/jonpulsifer/dotfiles/main/windows/bootstrap.ps1))) -WithWsl
 ```
 
 Windows keeps its own clone, and no link crosses the WSL boundary. See
@@ -65,7 +65,7 @@ Windows keeps its own clone, and no link crosses the WSL boundary. See
 - `pi/mate/` is the `mate` pi package. It holds Rowbutt's persona, a note on
   the workstation, the hipster theme, prompts and status line, and extensions
   that give pi the weather, kthx and `.mcp.json` MCP servers and this repo's
-  `.agents/skills` in other repos. `mise run --cd dotfiles pi:setup` declares
+  `.agents/skills` in other repos. `mise run pi:setup` declares
   it in pi's `settings.json` as `../../.dotfiles/pi/mate`, fills missing keys
   from `pi/settings.seed.json`, and removes links into `.pi/agent` and copies
   of this repo's files from pi's `extensions`, `prompts` and `themes`. It runs
@@ -76,7 +76,7 @@ Windows keeps its own clone, and no link crosses the WSL boundary. See
 ## Test
 
 ```bash
-mise run --cd dotfiles dotfiles:check   # deploy into scratch homes; change nothing in $HOME
+mise run dotfiles:check   # deploy into scratch homes; change nothing in $HOME
 mise run check                          # at the repo root: shfmt, shellcheck and PSScriptAnalyzer
 ```
 
