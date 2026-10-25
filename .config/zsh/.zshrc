@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Zsh — mise-managed plugins (http backend, see ~/.config/mise/config.toml) + mise
+# Zsh — plugins from mise (http backend, see ~/.config/mise/config.toml) or home-manager + mise
 export ZDOTDIR="${ZDOTDIR:-$HOME/.config/zsh}"
 
 # --- PATH: user scripts first, then mise shims ---
@@ -72,14 +72,18 @@ ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]=fg=009
 ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]=fg=009
 ZSH_HIGHLIGHT_STYLES[assign]=none
 
-# --- Zsh plugins (mise http-backend tools, see ~/.config/mise/config.toml) ---
-# Resolved at shell-start rather than a fixed directory, since each plugin's install path
-# is versioned (~/.local/share/mise/installs/http-<name>/<version>/).
-ZPLUG_PURE="$(mise where http:zsh-plugin-pure 2>/dev/null)"
-ZPLUG_FZF_TAB="$(mise where http:zsh-plugin-fzf-tab 2>/dev/null)"
-ZPLUG_AUTOSUGGESTIONS="$(mise where http:zsh-plugin-autosuggestions 2>/dev/null)"
-ZPLUG_SYNTAX_HIGHLIGHTING="$(mise where http:zsh-plugin-syntax-highlighting 2>/dev/null)"
-ZPLUG_KUBE_PS1="$(mise where http:zsh-plugin-kube-ps1 2>/dev/null)"
+# --- Zsh plugins ---
+# mise installs them on workstations, at a versioned path it resolves at shell start. NixOS hosts
+# install nothing with mise, so home-manager links them under ~/.local/share/zsh/plugins.
+zplug() {
+  mise where "http:zsh-plugin-$1" 2>/dev/null ||
+    { [[ -d "$HOME/.local/share/zsh/plugins/$1" ]] && print -r -- "$HOME/.local/share/zsh/plugins/$1"; }
+}
+ZPLUG_PURE="$(zplug pure)"
+ZPLUG_FZF_TAB="$(zplug fzf-tab)"
+ZPLUG_AUTOSUGGESTIONS="$(zplug autosuggestions)"
+ZPLUG_SYNTAX_HIGHLIGHTING="$(zplug syntax-highlighting)"
+ZPLUG_KUBE_PS1="$(zplug kube-ps1)"
 
 [[ -n "$ZPLUG_KUBE_PS1" ]] && fpath+=("$ZPLUG_KUBE_PS1")
 [[ -n "$ZPLUG_PURE" ]] && fpath+=("$ZPLUG_PURE")
@@ -93,7 +97,7 @@ autoload -Uz compinit && compinit -C
 [[ -n "$ZPLUG_FZF_TAB" && -r "$ZPLUG_FZF_TAB/fzf-tab.zsh" ]] && \
   source "$ZPLUG_FZF_TAB/fzf-tab.zsh"
 
-if [[ -n "$ZPLUG_PURE" && -r "$ZPLUG_PURE/pure.zsh" ]]; then
+if [[ -n "$ZPLUG_PURE" && -r "$ZPLUG_PURE/prompt_pure_setup" ]]; then
   autoload -Uz promptinit && promptinit
   prompt pure
 fi
