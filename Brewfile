@@ -1,4 +1,4 @@
-# Homebrew drops every variable but HOMEBREW_*, so bootstrap:macos passes MISE_ENV as
+# Homebrew drops every variable but HOMEBREW_*, so bootstrap passes MISE_ENV as
 # HOMEBREW_MISE_ENV. The work laptop sets MISE_ENV=work and leaves out the personal and homelab entries.
 work = ENV["HOMEBREW_MISE_ENV"].to_s.split(",").include?("work")
 

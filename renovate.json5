@@ -10,7 +10,7 @@
     {
       customType: 'regex',
       description: 'zsh plugin pins in the global mise config',
-      managerFilePatterns: ['/^mise-global-config\\.toml$/'],
+      managerFilePatterns: ['/^mise/global\\.toml$/'],
       matchStrings: [
         // # renovate: datasource=github-tags depName=sindresorhus/pure
         // version = "1.27.1"

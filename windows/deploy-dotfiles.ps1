@@ -131,7 +131,7 @@ New-Link -Source (Join-Path $WindowsDir 'profile.d') -Target "$HOME\.config\powe
 New-Link -Source (Join-Path $DotfilesDir '.config\git') -Target "$HOME\.config\git"
 New-Link -Source (Join-Path $WindowsDir 'gitconfig') -Target "$HOME\.gitconfig"
 
-New-Link -Source (Join-Path $DotfilesDir 'mise-global-config.toml') -Target "$HOME\.config\mise\config.toml"
+New-Link -Source (Join-Path $DotfilesDir 'mise\global.toml') -Target "$HOME\.config\mise\config.toml"
 
 # .ssh/config is not linked: Win32-OpenSSH does not understand its ControlMaster
 # and Match exec settings.
