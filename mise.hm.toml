@@ -3,4 +3,3 @@
 [dotfiles]
 "~/.zshenv" = { source = ".zshenv", enabled = false }
 "~/.config/zsh" = { source = ".config/zsh", enabled = false }
-"~/.config/nvim" = { source = ".config/nvim", enabled = false }

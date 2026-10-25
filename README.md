@@ -54,7 +54,7 @@ Windows keeps its own clone, and no link crosses the WSL boundary. See
 ## Layout
 
 - `mise.toml` holds the `[dotfiles]` table and the tasks. `mise.hm.toml`
-  turns off the zsh and nvim entries that home-manager owns.
+  turns off the zsh entries that home-manager owns.
 - `mise-global-config.toml` becomes `~/.config/mise/config.toml`. It holds the
   global tools, and on Windows the shell tools that Homebrew and home-manager
   install elsewhere.

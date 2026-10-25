@@ -34,7 +34,6 @@
 # mise.hm.toml turns these off where home-manager writes them.
 "~/.zshenv" = { source = ".zshenv" }
 "~/.config/zsh" = { mode = "symlink-each", source = ".config/zsh" }
-"~/.config/nvim" = { mode = "symlink-each", source = ".config/nvim" }
 
 [tasks.bootstrap]
 description = "Auto-detect OS and delegate to bootstrap:macos, :linux or :windows"
@@ -96,7 +95,7 @@ case ",${MISE_ENV:-}," in
     done
     ;;
 esac
-legacy=".local/bin .agents/skills .claude/skills .gemini/config/skills .pi/agent/agents .config/git .config/zsh .config/nvim"
+legacy=".local/bin .agents/skills .claude/skills .gemini/config/skills .pi/agent/agents .config/git .config/zsh"
 home="$(cd "$HOME" && pwd -P)"
 # The mise on PATH can sit behind a directory link that this moves.
 mise="$(cd "$(dirname "$(command -v mise)")" && pwd -P)/mise"
@@ -175,7 +174,7 @@ seed_legacy() {
   chmod 444 "$HOME/.tmux.conf" "$HOME/.config/git/config"
 }
 # home-manager links each file it writes into its home-manager-files output.
-hm_links=".zshenv .config/zsh/.zshrc .config/nvim/init.lua"
+hm_links=".zshenv .config/zsh/.zshrc"
 seed_hm() {
   for f in $hm_links; do
     mkdir -p "$HOME/hm/home-manager-files/$(dirname "$f")" "$HOME/$(dirname "$f")"
