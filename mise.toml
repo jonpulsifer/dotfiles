@@ -50,7 +50,7 @@ run = [
 run_windows = "mise run bootstrap:windows"
 
 [tasks."bootstrap:windows"]
-description = "Windows bootstrap: install tools, symlink dotfiles, install PowerShell modules"
+description = "Windows bootstrap: install tools and symlink dotfiles"
 # The default inline shell on Windows is cmd /c.
 shell = "pwsh -c"
 run = [

@@ -68,6 +68,7 @@ Work repos get the work git identity on every machine, whatever the profile.
 | | |
 | --- | --- |
 | 🐚 **zsh** | [pure](https://github.com/sindresorhus/pure), autosuggestions, syntax highlighting, fzf-tab and kube-ps1. One `.zshrc` everywhere: mise installs the plugins, and home-manager does on NixOS. |
+| **PowerShell** | The default prompt, bundled PSReadLine history prediction and completion, aliases and WSL helpers. Mise shims select tools without startup hooks; use `mise run` or `mise exec` for project environment variables. No extra Gallery modules. |
 | ✏️ **vim** | A plugin-free `.vimrc` with syntax highlighting and a built-in colorscheme, for a quick edit over SSH. |
 | 🌿 **git** | SSH commit signing through 1Password, and a separate identity in work repos. |
 | 🖥️ **terminal** | tmux and Ghostty. |
