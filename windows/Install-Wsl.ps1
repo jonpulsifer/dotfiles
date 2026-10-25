@@ -13,9 +13,13 @@
     itself from nix/images/wsl.nix. Pass -TarballPath to import an image built
     here instead, which skips the upstream hop.
 
-    This script stops at the handoff. It does not run nixos-rebuild: that wants
-    the sops age key in place and a human watching, and what happens inside the
-    distro is nix/'s business, not Windows'.
+    /home lives on its own VHDX, not on the distro's disk, so a distro can be
+    replaced and keep its home. The image attaches that disk at every boot and
+    will not boot without it. Importing this repo's image runs wsl-home-init,
+    which creates the disk unless it exists already.
+
+    This script stops at the handoff. It does not run nixos-rebuild: what
+    happens inside the distro is nix/'s business, not Windows'.
 
 .PARAMETER Name
     Distro name to import as.
@@ -26,22 +30,42 @@
 
 .PARAMETER Location
     Where the distro's virtual disk lives.
+
+.PARAMETER Replace
+    Unregister an existing distro of the same name first. It refuses unless
+    that distro's /home is on the home disk, so nothing but the root disk goes.
 #>
 [CmdletBinding()]
 param(
     [string] $Name = 'NixOS',
     [string] $TarballPath,
-    [string] $Location = (Join-Path $env:LOCALAPPDATA 'WSL')
+    [string] $Location = (Join-Path $env:LOCALAPPDATA 'WSL'),
+    [switch] $Replace
 )
+
+$homeLabel = 'nixos-home'
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $existing = wsl.exe --list --quiet 2>$null | ForEach-Object { $_.Trim() } | Where-Object { $_ }
 if ($existing -contains $Name) {
-    Write-Host "  ok       distro '$Name' already exists; leaving it alone"
-    Write-Host '  (a distro is somebody'' s running machine -- this script will not replace one)'
-    return
+    if (-not $Replace) {
+        Write-Host "  ok       distro '$Name' already exists; leaving it alone"
+        Write-Host '  (a distro is somebody'' s running machine -- pass -Replace to swap its root disk)'
+        return
+    }
+    # A root shell does not wait for /home, so start the mount and wait for it before looking.
+    wsl.exe -d $Name -u root -- systemctl start home.mount 2>$null | Out-Null
+    $homeOn = (wsl.exe -d $Name -u root -- findmnt -no LABEL /home 2>$null | Out-String).Trim()
+    if ($homeOn -ne $homeLabel) {
+        throw "Distro '$Name' does not mount /home from the '$homeLabel' disk. Replacing it would delete its home."
+    }
+    if (-not $TarballPath) {
+        throw '-Replace needs -TarballPath: the upstream image does not mount the home disk.'
+    }
+    Write-Host "  unregistering '$Name' (its home stays on the home disk)"
+    wsl.exe --unregister $Name
 }
 
 # --no-distribution skips the default Ubuntu install.
@@ -68,8 +92,22 @@ try {
     New-Item -ItemType Directory -Path $Location -Force | Out-Null
 
     Write-Host "  importing '$Name' into $Location"
-    wsl.exe --install --from-file $TarballPath --name $Name --location (Join-Path $Location $Name)
+    wsl.exe --install --from-file $TarballPath --name $Name --location (Join-Path $Location $Name) --no-launch
     wsl.exe --set-default $Name
+
+    if (-not $downloaded) {
+        # The first boot without a home disk stops short of /home; root still gets a shell.
+        wsl.exe -d $Name -u root -- wsl-home-init
+        if ($LASTEXITCODE -ne 0) {
+            throw 'wsl-home-init failed; see its message above.'
+        }
+    }
+    wsl.exe --terminate $Name
+    # Without it the root disk only ever grows. WSL holds the disk open until it shuts down.
+    wsl.exe --manage $Name --set-sparse true 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  later    the disk is in use; after the next 'wsl --shutdown', run: wsl --manage $Name --set-sparse true"
+    }
 }
 finally {
     if ($downloaded) {
@@ -79,6 +117,16 @@ finally {
 
 Write-Host ''
 Write-Host "Distro '$Name' is up. Finish inside it:" -ForegroundColor Green
+if ($downloaded) {
+    Write-Host @"
+  # the upstream image does not mount the home disk yet; boot into this repo's config first
+  wsl -d $Name -- sudo nixos-rebuild boot --flake github:jonpulsifer/infra#wsl
+  wsl --terminate $Name
+  wsl -d $Name -u root -- wsl-home-init
+  wsl --terminate $Name
+
+"@
+}
 Write-Host @"
   wsl -d $Name
 
