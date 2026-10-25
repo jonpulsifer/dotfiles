@@ -1,0 +1,4 @@
+# Linked as ~/.config/mise/config.work.toml. mise reads it only when MISE_ENV includes work, so the
+# homelab's tools stay out of `mise ls` and `mise install` on the work laptop.
+[settings]
+disable_tools = ["opencode", "pi", "codex", "github:cloudnative-pg/cloudnative-pg"]
