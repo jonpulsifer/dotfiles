@@ -17,13 +17,10 @@
     Resolve and report every link without touching the filesystem. Exits
     non-zero if any source is missing, which is what CI checks.
 
-.PARAMETER SkipModules
-    Skip the PSGallery module install.
 #>
 [CmdletBinding()]
 param(
-    [switch] $DryRun,
-    [switch] $SkipModules
+    [switch] $DryRun
 )
 
 Set-StrictMode -Version Latest
@@ -160,10 +157,6 @@ foreach ($target in @("$HOME\.agents\skills", "$HOME\.claude\skills")) {
 }
 
 New-Link -Source (Join-Path $DotfilesDir '.claude\settings.json') -Target "$HOME\.claude\settings.json"
-
-if (-not $SkipModules -and -not $DryRun) {
-    & (Join-Path $WindowsDir 'Install-Modules.ps1')
-}
 
 if ($script:Problems -gt 0) {
     Write-Error "$script:Problems problem(s) -- see warnings above."

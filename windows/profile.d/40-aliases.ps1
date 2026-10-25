@@ -28,21 +28,6 @@ if (Get-Command kubectl -ErrorAction SilentlyContinue) {
     }
     function kube { kubectl @args }
     function k { kubectl @args }
-
-    # Generating completion is the slowest step in the profile, so the output is
-    # cached until the kubectl binary changes.
-    $cacheDir = Join-Path $HOME '.cache/powershell'
-    $completion = Join-Path $cacheDir 'kubectl-completion.ps1'
-    $binary = (Get-Command kubectl).Source
-
-    $stale = -not (Test-Path -LiteralPath $completion) -or
-        (Get-Item -LiteralPath $completion).LastWriteTimeUtc -lt (Get-Item -LiteralPath $binary).LastWriteTimeUtc
-
-    if ($stale) {
-        New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null
-        kubectl completion powershell | Set-Content -LiteralPath $completion -Encoding utf8
-    }
-    . $completion
 }
 
 if (Get-Command kubectx -ErrorAction SilentlyContinue) {
