@@ -55,6 +55,8 @@ if ($existing -contains $Name) {
         Write-Host '  (a distro is somebody'' s running machine -- pass -Replace to swap its root disk)'
         return
     }
+    # A root shell does not wait for /home, so start the mount and wait for it before looking.
+    wsl.exe -d $Name -u root -- systemctl start home.mount 2>$null | Out-Null
     $homeOn = (wsl.exe -d $Name -u root -- findmnt -no LABEL /home 2>$null | Out-String).Trim()
     if ($homeOn -ne $homeLabel) {
         throw "Distro '$Name' does not mount /home from the '$homeLabel' disk. Replacing it would delete its home."
@@ -101,8 +103,11 @@ try {
         }
     }
     wsl.exe --terminate $Name
-    # Without it the root disk only ever grows.
-    wsl.exe --manage $Name --set-sparse true
+    # Without it the root disk only ever grows. WSL holds the disk open until it shuts down.
+    wsl.exe --manage $Name --set-sparse true 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  later    the disk is in use; after the next 'wsl --shutdown', run: wsl --manage $Name --set-sparse true"
+    }
 }
 finally {
     if ($downloaded) {
