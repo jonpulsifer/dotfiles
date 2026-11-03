@@ -37,6 +37,7 @@ ripgrep = { version = "latest", os = ["windows"] }
 sd = { version = "latest", os = ["windows"] }
 zoxide = { version = "latest", os = ["windows"] }
 codex = "latest"
+gcloud = "latest"
 
 # zsh plugins for this repo's .zshrc; home-manager's .zshrc brings its own
 [tools."http:zsh-plugin-pure"]
