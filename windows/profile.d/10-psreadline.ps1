@@ -1,11 +1,11 @@
 # PSReadLine settings that stand in for the zsh plugins and options.
 
-# zsh-autosuggestions. HistoryAndPlugin adds CompletionPredictor to history.
-Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-Set-PSReadLineOption -PredictionViewStyle ListView
-if (Get-Module -ListAvailable -Name CompletionPredictor) {
-    Import-Module CompletionPredictor
+# Use the bundled editor and history prediction without loading extra modules.
+if ([Console]::IsOutputRedirected -or $env:TERM -eq 'dumb') {
+    return
 }
+Set-PSReadLineOption -PredictionSource History
+Set-PSReadLineOption -PredictionViewStyle InlineView
 
 Set-PSReadLineOption -EditMode Emacs
 Set-PSReadLineOption -BellStyle None
@@ -35,11 +35,10 @@ Set-PSReadLineOption -Colors @{
     ListPredictionSelected = "$([char]27)[48;5;238m"
 }
 
-# 30-fzf.ps1 rebinds Tab to PSFzf when it is installed.
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Key Shift+Tab -Function TabCompletePrevious
 
-# Up/Down search history by prefix. Ctrl-R opens the fzf picker (30-fzf.ps1).
+# Up/Down search history by prefix; Ctrl-R uses PSReadLine's history search.
 Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
 Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
 

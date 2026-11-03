@@ -9,7 +9,7 @@ if command -v mise >/dev/null 2>&1; then
   export MISE_NODE_COMPILE=false
 fi
 
-if [[ "$(uname -s)" == "Darwin" ]]; then
+if [[ "$OSTYPE" == darwin* ]]; then
   # Homebrew — all macOS hosts
   if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -73,23 +73,28 @@ ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]=fg=009
 ZSH_HIGHLIGHT_STYLES[assign]=none
 
 # --- Zsh plugins ---
-# mise installs them on workstations, at a versioned path it resolves at shell start. NixOS hosts
-# install nothing with mise, so home-manager links them under ~/.local/share/zsh/plugins.
+# Prefer home-manager's links on NixOS; other workstations resolve the active mise version.
 zplug() {
-  mise where "http:zsh-plugin-$1" 2>/dev/null ||
-    { [[ -d "$HOME/.local/share/zsh/plugins/$1" ]] && print -r -- "$HOME/.local/share/zsh/plugins/$1"; }
+  local plugin="$HOME/.local/share/zsh/plugins/${2:-$1}"
+  if [[ -d "$plugin" ]]; then
+    print -r -- "$plugin"
+  elif (( $+commands[mise] )); then
+    mise where "http:zsh-plugin-$1" 2>/dev/null
+  fi
 }
 ZPLUG_PURE="$(zplug pure)"
 ZPLUG_FZF_TAB="$(zplug fzf-tab)"
-ZPLUG_AUTOSUGGESTIONS="$(zplug autosuggestions)"
-ZPLUG_SYNTAX_HIGHLIGHTING="$(zplug syntax-highlighting)"
+ZPLUG_AUTOSUGGESTIONS="$(zplug autosuggestions zsh-autosuggestions)"
+ZPLUG_SYNTAX_HIGHLIGHTING="$(zplug syntax-highlighting zsh-syntax-highlighting)"
 ZPLUG_KUBE_PS1="$(zplug kube-ps1)"
 
 [[ -n "$ZPLUG_KUBE_PS1" ]] && fpath+=("$ZPLUG_KUBE_PS1")
 [[ -n "$ZPLUG_PURE" ]] && fpath+=("$ZPLUG_PURE")
 [[ -d /opt/homebrew/share/zsh/site-functions ]] && fpath[1,0]="/opt/homebrew/share/zsh/site-functions"
 
-autoload -Uz compinit && compinit -C
+if (( ! $+_comps )); then
+  autoload -Uz compinit && compinit -C
+fi
 
 # Order: autosuggestions → fzf-tab → pure prompt → syntax-highlighting (must be last)
 [[ -n "$ZPLUG_AUTOSUGGESTIONS" && -r "$ZPLUG_AUTOSUGGESTIONS/zsh-autosuggestions.zsh" ]] && \
@@ -160,8 +165,15 @@ bindkey "^[[1;5D" backward-word
 if command -v kubectl >/dev/null 2>&1 && [[ -n "$ZPLUG_KUBE_PS1" && -r "$ZPLUG_KUBE_PS1/kube-ps1.sh" ]]; then
   source "$ZPLUG_KUBE_PS1/kube-ps1.sh"
 
-  # Load kubectl completions before aliasing to kubecolor
-  source <(kubectl completion zsh)
+  # Generate completions on the first Tab, rather than at every shell startup.
+  _kubectl() {
+    local completion
+    completion="$(command kubectl completion zsh)" || return
+    unfunction _kubectl
+    eval "$completion"
+    (( $+functions[_kubectl] )) && _kubectl "$@"
+  }
+  compdef _kubectl kubectl
   alias kubectl="kubecolor"
   compdef kubecolor=kubectl
   compdef k=kubectl

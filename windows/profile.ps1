@@ -1,6 +1,6 @@
 #Requires -Version 7.0
 # $PROFILE.CurrentUserAllHosts. Loads profile.d in filename order, so 00-mise puts
-# tools on PATH first. The path is fixed because $PSScriptRoot is the symlink's directory.
+# shims on PATH first. The path is fixed because $PSScriptRoot is the symlink's directory.
 
 $fragmentDir = Join-Path $HOME '.config/powershell/profile.d'
 if (Test-Path -LiteralPath $fragmentDir) {
