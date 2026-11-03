@@ -18,6 +18,7 @@ kubecolor = "latest"
 kubectx = "latest"
 kubens = "latest"
 "github:cloudnative-pg/cloudnative-pg" = { version = "latest", exe = "kubectl-cnpg" }
+kubelogin = "latest"
 claude-code = "latest"
 opencode = "latest"
 pi = "latest"
