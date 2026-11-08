@@ -2,9 +2,17 @@
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
 
-    "//": "Deliberately minimal. No profiles list: Terminal generates PowerShell and WSL profiles dynamically, and their GUIDs differ per machine, so hardcoding them here would produce a settings file that only works on one box. Everything shared lives in profiles.defaults. Argonaut and CaskaydiaCove match the ghostty config the other platforms use.",
+    "//": "Every profile is listed here with its own GUID. Terminal records each profile it generates in state.json, and a generated profile missing from this file counts as one the user deleted, so a list left to the generators hides everything on a machine where Terminal ran before the deploy. The generators that would duplicate these profiles are off, and Windows PowerShell and cmd are listed so that Terminal never writes their stubs through the link into the checkout. Argonaut and CaskaydiaCove match the ghostty config the other platforms use.",
 
-    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    "defaultProfile": "{7d937d22-dfa8-480a-8b30-22bf062f9b04}",
+
+    "disabledProfileSources": [
+        "Windows.Terminal.Azure",
+        "Windows.Terminal.PowershellCore",
+        "Windows.Terminal.SshConfig",
+        "Windows.Terminal.VisualStudio",
+        "Windows.Terminal.Wsl"
+    ],
 
     "copyOnSelect": true,
     "copyFormatting": "none",
@@ -26,7 +34,30 @@
             "historySize": 100000,
             "antialiasingMode": "grayscale",
             "cursorShape": "bar"
-        }
+        },
+        "list": [
+            {
+                "guid": "{7d937d22-dfa8-480a-8b30-22bf062f9b04}",
+                "name": "PowerShell",
+                "commandline": "pwsh.exe -NoLogo",
+                "icon": "ms-appx:///ProfileIcons/pwsh.png",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "//": "windows/Install-Wsl.ps1 imports this distro with its root disk at D:\\WSL\\NixOS\\ext4.vhdx. /home is D:\\WSL\\home.vhdx, which the distro attaches itself at boot.",
+                "guid": "{6f58f45b-da63-4a68-8c58-a9a55c48b10d}",
+                "name": "NixOS",
+                "commandline": "wsl.exe -d NixOS --cd ~"
+            },
+            {
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "name": "Windows PowerShell"
+            },
+            {
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "name": "Command Prompt"
+            }
+        ]
     },
 
     "schemes": [
