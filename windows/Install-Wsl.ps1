@@ -29,7 +29,10 @@
     NixOS-WSL release is downloaded.
 
 .PARAMETER Location
-    Where the distro's virtual disk lives.
+    The folder that holds the distro's folder. The default D:\WSL puts the root
+    disk at D:\WSL\NixOS\ext4.vhdx, beside the home disk at D:\WSL\home.vhdx
+    that the infra repo's homelab.wsl.homeDisk names. The NixOS profile in
+    windows-terminal/settings.json opens this distro.
 
 .PARAMETER Replace
     Unregister an existing distro of the same name first. It refuses unless
@@ -39,7 +42,7 @@
 param(
     [string] $Name = 'NixOS',
     [string] $TarballPath,
-    [string] $Location = (Join-Path $env:LOCALAPPDATA 'WSL'),
+    [string] $Location = 'D:\WSL',
     [switch] $Replace
 )
 
@@ -49,12 +52,19 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $existing = wsl.exe --list --quiet 2>$null | ForEach-Object { $_.Trim() } | Where-Object { $_ }
+if ($existing -contains $Name -and -not $Replace) {
+    Write-Host "  ok       distro '$Name' already exists; leaving it alone"
+    Write-Host '  (a distro is somebody'' s running machine -- pass -Replace to swap its root disk)'
+    return
+}
+
+# Checked before -Replace unregisters anything.
+$drive = Split-Path -Qualifier $Location
+if (-not (Test-Path -LiteralPath "$drive\")) {
+    throw "Drive $drive does not exist. Pass -Location with a folder on a drive this machine has."
+}
+
 if ($existing -contains $Name) {
-    if (-not $Replace) {
-        Write-Host "  ok       distro '$Name' already exists; leaving it alone"
-        Write-Host '  (a distro is somebody'' s running machine -- pass -Replace to swap its root disk)'
-        return
-    }
     # A root shell does not wait for /home, so start the mount and wait for it before looking.
     wsl.exe -d $Name -u root -- systemctl start home.mount 2>$null | Out-Null
     $homeOn = (wsl.exe -d $Name -u root -- findmnt -no LABEL /home 2>$null | Out-String).Trim()
